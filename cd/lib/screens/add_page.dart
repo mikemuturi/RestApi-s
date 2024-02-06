@@ -100,13 +100,49 @@ class _AddTodoPageState extends State<AddTodoPage> {
   //   final response = await http.post(uri, body: jsonEncode(body));
 
   //   print(response);
- 
+
 
   //   //show success or fail message based on status
   // }
 
 
-  Future<void> updateData() async {}
+  Future<void> updateData() async {
+
+    final todo = widget.todo;
+    if (todo == null) {
+      print("Unable to update without to do data");
+      return;
+    }
+
+    final id = todo['_id'];
+    // final isCompleted = todo['is_completed'];
+    final title = titleController.text;
+    final description = descriptionController.text;
+    final body = {
+      "title": title,
+      "description": descriptionController.text,
+      "is_completed": false, //isCompleted
+    };
+
+    final url = "https://api.nstack.in/v1/todos/$id";
+    final uri = Uri.parse(url);
+    final response = await http.put(
+      uri,
+      body: jsonEncode(body),
+      headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200){
+        showSuccessMessage("Updated succesfully");
+        print(response.body);
+        Navigator.pop(context);
+      } else {
+        showErrorMessage("failed to update");
+        print(response.body);
+        Navigator.pop(context);
+      }
+
+  }
 
 Future<void> submitData() async {
     final title = titleController.text;

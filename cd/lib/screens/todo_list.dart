@@ -35,40 +35,42 @@ class _TodoListPageState extends State<TodoListPage> {
       body: RefreshIndicator(
         onRefresh: fetchTodo,
         child: ListView.builder(
+          padding: EdgeInsets.all(12),
           itemCount: items.length,
           itemBuilder: (context,index)
         {
           final item = items[index] as Map;
           final id = item ['_id'] as String;
-          return  ListTile(
-          leading: CircleAvatar(child: Text('${index + 1}'),),
-          title: Text(item['title']),
-          subtitle: Text(item['description']),
-          trailing: PopupMenuButton(
-            onSelected: (value) {
-              if (value == 'edit')
+          return  Card(
+            child: ListTile(
+            leading: CircleAvatar(child: Text('${index + 1}'),),
+            title: Text(item['title']),
+            subtitle: Text(item['description']),
+            trailing: PopupMenuButton(
+              onSelected: (value) {
+                if (value == 'edit')
+                {
+                    navigateToEditPage(item);
+                } else if( value == 'delete')
+                {
+                    deleteById(id);
+                }
+              },
+              itemBuilder: (context)
               {
-                  navigateToEditPage(item);
-              } else if( value == 'delete')
-              {
-                  deleteById(id);
+              return [
+                const PopupMenuItem(
+                  child: Text("Edit"),
+                value: 'edit',
+                ),
+                const PopupMenuItem(
+                  child: Text('Delete'),
+                value: 'delete',
+                )
+              ];
               }
-            },
-            itemBuilder: (context)
-            {
-            return [
-              const PopupMenuItem(
-                child: Text("Edit"),
-              value: 'edit',
-              ),
-              const PopupMenuItem(
-                child: Text('Delete'),
-              value: 'delete',
-              )
-            ];
-            }
-          ),
-      
+            ),
+            ),
           );
         }
         ),
@@ -80,22 +82,26 @@ class _TodoListPageState extends State<TodoListPage> {
     }
     // edit page
 
-     void navigateToEditPage(Map item) async{
+    Future <void> navigateToEditPage(Map item) async{
     final route = MaterialPageRoute(
       builder: (context) =>  AddTodoPage(todo:item),
       );
       await Navigator.push(context, route);
+        setState(() {
+      isLoading = true;
+    });
+    fetchTodo();
   }
   // ignore: non_constant_identifier_names
- Future <void> navigateToAddPage() async{
+Future <void> navigateToAddPage() async{
     final route = MaterialPageRoute(
       builder: (context) => const AddTodoPage(),
       );
-     await Navigator.push(context, route);
-     setState(() {
-       isLoading = true;
-     });
-     fetchTodo();
+    await Navigator.push(context, route);
+    setState(() {
+      isLoading = true;
+    });
+    fetchTodo();
   }
 
   Future<void> deleteById (String id) async
