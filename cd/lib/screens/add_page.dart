@@ -7,7 +7,11 @@ import 'package:flutter/material.dart';
 
 
 class AddTodoPage extends StatefulWidget {
-  const AddTodoPage({super.key});
+  final Map? todo;
+  const AddTodoPage({
+    super.key,
+    this.todo
+    });
 
 
   @override
@@ -18,6 +22,22 @@ class AddTodoPage extends StatefulWidget {
 class _AddTodoPageState extends State<AddTodoPage> {
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+  bool isEdit = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final todo = widget.todo;
+    if (todo != null){
+      isEdit = true;
+
+      final title = todo['title'];
+      final description = todo ['description'];
+
+      titleController.text = title;
+      descriptionController.text = description;
+    }
+  }
 
 
 
@@ -25,7 +45,8 @@ class _AddTodoPageState extends State<AddTodoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Todo"),
+        title:  Text(
+          isEdit? "Edit Todo" : "Add Todo"),
         centerTitle: true,
       ),
       body: ListView(
@@ -48,8 +69,13 @@ class _AddTodoPageState extends State<AddTodoPage> {
               hintText: "Description"),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(onPressed: submitData,
-            child: const Text("Submit"),
+            ElevatedButton(onPressed:
+            isEdit? updateData : submitData,
+            child:  Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: Text(
+                isEdit? "Update" : "Submit"),
+            ),
           )
         ],
       ),
@@ -80,7 +106,9 @@ class _AddTodoPageState extends State<AddTodoPage> {
   // }
 
 
- Future<void> submitData() async {
+  Future<void> updateData() async {}
+
+Future<void> submitData() async {
     final title = titleController.text;
     final description = descriptionController.text;
 
@@ -100,12 +128,18 @@ class _AddTodoPageState extends State<AddTodoPage> {
     );
 
     if (response.statusCode == 201) {
+      titleController.text ='';
+      descriptionController.text = '';
       showSuccessMessage("Submitted Successfully");
-      print(response.body);
+      Navigator.pop(context);
+      // print(response.body);
     } else {
       showErrorMessage("Unable to submit your request");
     }
   }
+
+
+
 
   void showSuccessMessage(String message) {
     final snackBar = SnackBar(content: Text(message));
@@ -114,7 +148,7 @@ class _AddTodoPageState extends State<AddTodoPage> {
 
   void showErrorMessage(String message) {
     final snackBar = SnackBar(content: Text(message,
-    style: TextStyle(color: Colors.white),
+    style: const TextStyle(color: Colors.white),
     ),
     backgroundColor: Colors.red,
     );
